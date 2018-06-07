@@ -18,6 +18,9 @@ namespace TaxiFarePrediction
         {
             PredictionModel<TaxiTrip, TaxiTripFarePrediction> model = await Train();
             Evaluate(model);
+
+            var prediction = model.Predict(TestTrips.Trip1);
+            Console.WriteLine("Predicted fare: {0}, actual fare: 29.5", prediction.FareAmount);
         }
 
         static async Task<PredictionModel<TaxiTrip, TaxiTripFarePrediction>> Train()
