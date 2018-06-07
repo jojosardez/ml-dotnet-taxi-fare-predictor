@@ -1,7 +1,9 @@
 ﻿using Microsoft.ML;
 using Microsoft.ML.Data;
+using Microsoft.ML.Models;
 using Microsoft.ML.Trainers;
 using Microsoft.ML.Transforms;
+using System;
 using System.Threading.Tasks;
 
 namespace TaxiFarePrediction
@@ -15,6 +17,7 @@ namespace TaxiFarePrediction
         static async Task Main(string[] args)
         {
             PredictionModel<TaxiTrip, TaxiTripFarePrediction> model = await Train();
+            Evaluate(model);
         }
 
         static async Task<PredictionModel<TaxiTrip, TaxiTripFarePrediction>> Train()
@@ -52,6 +55,21 @@ namespace TaxiFarePrediction
             await model.WriteAsync(_modelpath);
 
             return model;
+        }
+
+        private static void Evaluate(PredictionModel<TaxiTrip, TaxiTripFarePrediction> model)
+        {
+            // Load test data
+            var testData = new TextLoader(_datapath).CreateFrom<TaxiTrip>(useHeader: true, separator: ',');
+
+            // Evaluate test data
+            var evaluator = new RegressionEvaluator();
+            RegressionMetrics metrics = evaluator.Evaluate(model, testData);
+
+            // Display regression evaluation metrics
+            // Rms should be around 2.795276
+            Console.WriteLine("Rms=" + metrics.Rms);
+            Console.WriteLine("RSquared = " + metrics.RSquared);
         }
     }
 }
